@@ -4,7 +4,7 @@ import axios from "axios";
 import { downloadFile, sleep } from "fzz";
 
 async function backupAll() {
-  let re = await axios.get("https://www.figma.com/api/user/state"); 
+  let re = await axios.get("https://www.figma.com/api/user/state");
   let teams = re.data.meta.teams;
   console.log("Teams:", teams);
 
@@ -17,11 +17,11 @@ async function backupAll() {
   let allFiles = [];
 
   function echo() {
-    let title = `🌒 备份全部 Figma 文件 v1.0`;
+    let title = `🌒 备份全部 Figma 文件 v1.1`;
     windowEl.innerText = `${title}\n\n${infoMain}\n${infoSub1}\n${infoSub2}`;
   }
 
-  infoMain = `备份 ${teams.length} 个团队的所有文件`;
+  infoMain = `备份 ${teams.length} 个团队的所有文件，（之后会通过浏览器自动下载每一个文件， 请留意你的下载文件夹）`;
   echo();
 
   for (const team of teams) {
@@ -41,6 +41,7 @@ async function backupAll() {
       );
 
       let files = re.data.meta.files;
+      let folderName = re.data.meta.folder.name;
       console.log("Files:", files);
 
       await Promise.all(
@@ -51,6 +52,7 @@ async function backupAll() {
 
           let fileInfo = {
             name: file.name,
+            dlname: `${team.name}-${folderName}-${file.name}`,
             url: re.data.meta.canvas_url,
           };
           infoSub2 = `找到文件 ${file.name}, 已找到 ${allFiles.length} 个文件`;
@@ -72,7 +74,7 @@ async function backupAll() {
 
     fetch(file.url).then((x) =>
       x.blob().then((blob) => {
-        downloadFile(blob, file.name + ".fig");
+        downloadFile(blob, file.dlname + ".fig");
       })
     );
   }
